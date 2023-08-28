@@ -1,0 +1,35 @@
+version: '3.7'
+
+networks:
+  onion-example:
+    driver: bridge
+
+services:
+  postgres-app:
+    container_name: postgres-data
+    image: postgres-data  
+    build:
+      context: ./PostgresData
+      dockerfile: Dockerfile
+    ports:
+      - 5442:5432  
+    networks:
+      - onion-example
+
+  product-data-app:
+    container_name: product-data
+    image: product-data  
+    build:
+      context: ./ProductData
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres-app
+    links:
+      - postgres-app
+    ports:
+      - 4200:8080  
+    networks:
+      - onion-example
+    volumes:
+      - ./ProductData/Onion.Api/appsettings.json:/app/appsettings.json
